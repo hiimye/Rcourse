@@ -1,0 +1,116 @@
+---
+title: "R Homework1"
+author: Yikang Liu
+output: html_notebook
+---
+
+作业:
+
+选择一个被试在match任务中的数据，也就是数据中包括"match"的那些数据中的一个， 以Shape和Match这两个自变量为分组条件， 画出来每个条件下的RT分布，总共有8个子图，大家以自己的方式来进行呈现。
+
+要求：
+
+（1）提交RMD文件，可以是Rnotebook或者是Rmarkdown；
+
+（2）能够直接放在我们课程文件夹那个根目录下运行，课程文件夹组织以GitHub为准；
+
+（3）从数据读取到画图的步骤/思路要写清楚。
+
+```{r load packages}
+library(tidyverse)
+library(ggplot2)
+```
+
+思路：
+
+（1）随机读取一个被试的数据
+
+（2）将被试的数据进行预处理
+
+（3）按照Shape和Match这两个条件画8个子图
+
+
+# 随机读取一个被试的数据
+
+（1）设置随机数种子，确保结果的可重复性
+
+（2）在目标文件夹中符合"data_exp7_rep_match_xxxx.out"命名的数据中随机选择一份
+
+（3）读取该数据
+
+（4）检查Shape,Match变量是否有4*2=8中条件
+```{r read datafile}
+# Set a seed for random number generation
+set.seed(123)
+# Get target path
+file_path <- "./data/match"
+# Get a list of all files in the "./data/match" directory that match the pattern
+file_list <- list.files(path = file_path, 
+                        pattern = "data_exp7_rep_match_.*\\.out$")
+# Select a random file from the matching files
+selected_file <- sample(x = file_list, 
+                        size = 1)
+# Read in the selected file into a data frame
+df_raw <- read.csv(file = paste(file_path, selected_file, sep = "/"),
+                   header = TRUE,
+                   sep = "")
+# Check if the Shape,Match variable has the condition 
+unique(df_raw$Shape)
+unique(df_raw$Match)
+```
+
+
+# 将被试的数据进行预处理
+
+(1)选择感兴趣的变量并设置变量的数据类型
+
+(2)去除表头数据与空值
+
+(3)按照acc调整RT的数据使正确反应时为正数，错误反应时为负数，以便后续展示正确和错误的反应时
+```{r preprocess the raw data, warning=FALSE}
+df <- df_raw %>%
+      select(Shape, # Select the desired variables
+             Match, 
+             ACC, 
+             RT) %>%   
+      mutate(Shape = as.character(Shape),  # Change the variable data type
+             Macth = as.character(Match),  
+             ACC = as.numeric(ACC), 
+             RT = as.numeric(RT)) %>%  
+      filter(Shape != "Shape" & # Filter out unwanted data
+             Match != "Match") %>%  
+      drop_na() %>% # Remove observation rows that contain missing values
+      mutate(ACC = case_when(ACC == 0 ~ -1,  # Convert the ACC variable to -1 or 1
+                             ACC == 1 ~ 1),
+             RT = RT * ACC)  # Multiply the RT variable by ACC
+```
+# 按照Shape和Match这两个条件画8个子图
+
+(1)在数据预处理部分利用ACC更新RT的值使其能够在同一张图中展示正确和错误的反应时
+
+(2)反应时分布的展示利用了histogram和density两种方式。为了使两者纵轴保持一致，histogram的纵轴以density的方式进行展示。为了不让两个图之间产生遮挡，故将density的透明度设为0，以将曲线下面积调整为透明。
+
+(3)为了同时展示8个子图，使用facet_grid对不同条件进行分面，以Shape条件作为行，Match条件作为列，展示了8个子图。同时保持各自子图间坐标轴一致。
+
+(4)为了使图片更加直观，将两种Match条件用不同颜色进行表示，并加入标题、图例等提示信息。
+```{r plot for rt distribution, message=FALSE, warning=FALSE}
+ggplot(data = df, 
+       mapping = aes(x = RT, 
+                     fill = Match)) +
+  geom_histogram(mapping = aes(y = ..density..), # add a histogram layer with density y-axis
+                 alpha = 0.5, 
+                 position = "identity") + # position set to "identity" to stack bars
+  geom_density(alpha = 0,  # add a density layer with alpha set to 0 to hide the fill area
+               color = 'black') +
+  facet_grid(rows = vars(Shape), # facet by Shape and Match conditions
+             cols = vars(Match), 
+             scales = "free", # allowing for free scales
+             switch = "y") + # switch the legend position
+  labs(title = "RT distributions by Shape and Match conditions",
+       x = "RT",
+       y = "Density",
+       fill = "Match") +
+  theme_bw() + # set the theme to black and white
+  theme(plot.title = element_text(hjust = 0.5)) # center the plot title horizontally
+```
+

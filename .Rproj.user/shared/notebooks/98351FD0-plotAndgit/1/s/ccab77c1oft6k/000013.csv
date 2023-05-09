@@ -1,0 +1,5 @@
+"0","p[[2]] <- p[[1]] +"
+"0","  ggplot2::labs(x = ""Moral & Identity"", y = ""Mean of Reaction Time"", title = ""Boxplot of RT_mean by Shape"")"
+"0",""
+"0","names(p)[2] <- ""Plot Lables"""
+"0","p[[2]]"

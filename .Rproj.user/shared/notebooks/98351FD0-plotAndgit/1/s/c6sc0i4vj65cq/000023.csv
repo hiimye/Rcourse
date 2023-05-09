@@ -1,0 +1,4 @@
+"0","p[[6]] <- p[[5]] +"
+"0","  ggdist::stat_halfeye(adjust = 0.2, justification = -0.35, alpha = 0.5, width = 0.5,.width = 0, point_colour = NA)"
+"0","names(p)[6] <- ""Cloud Plot"""
+"0","p[[6]]"

@@ -1,0 +1,157 @@
+---
+title: "FirstTime"
+author: "ye lin"
+date: "2023-05-08"
+output: html_document
+---
+
+```{r library packages, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(bruceR)
+library(ggdist)
+```
+
+```{r create a null list}
+df <- list()
+out <- list()
+p <- list()
+```
+
+#clean data
+```{r step1: read raw data, collapse=TRUE}
+df[[1]] <- read.csv("./data/match_raw.csv")
+names(df)[1] <- "step1: read raw data"
+```
+
+```{r step2: clean data, collapse=TRUE}
+df[[2]] <- df[[1]] %>%
+  dplyr::group_by(Sub,Shape,Match) %>%
+  dplyr::summarise(RT_mean = mean(RT)) %>%
+  dplyr::ungroup()
+
+names(df)[2] <- "step2: clean data"
+
+```
+
+
+```{r step3: box plot}
+p[[1]] <- ggplot2::ggplot(df[[2]], aes(x = Shape, y = RT_mean, fill = Shape)) +
+  ggplot2::geom_boxplot(color = "grey", alpha = 0.5)
+names(p)[1] <- "box plot"
+p[[1]]
+ggsave(filename = "./picture/chp11/plot1.png", plot = p[[1]], height = 5, width = 10, dpi=300)
+```
+
+```{r step4: box plot add title}
+p[[2]] <- p[[1]] +
+  ggplot2::labs(x = "Moral & Identity", y = "Mean of Reaction Time", title = "Boxplot of RT_mean by Shape")
+
+names(p)[2] <- "Plot Lables"
+p[[2]]
+ggsave(filename = "./picture/chp11/plot2.png", plot = p[[2]], height = 5, width = 10, dpi = 300)
+
+
+```
+
+```{r step5: add point plot}
+
+p[[3]] <- p[[2]] +
+  ggplot2::geom_point(aes(colour = Shape), position = position_jitter(width = 0.2), size = 2, alpha = 0.5)
+
+names(p)[3] <- "Point Plot"
+p[[3]]
+ggsave(filename = "./picture/chp11/plot3.png", plot = p[[3]], height = 5, width = 10, dpi = 300)
+
+```
+
+```{r step6: violin plot}
+p[[4]] <- p[[3]] +
+  ggplot2::geom_violin(aes(colour = Shape), color = "grey", width = 0.2, alpha = 0.5)
+names(p)[4] <- "Violin Plot"
+p[[4]]
+ggsave(filename = "./picture/chp11/plot4.png", plot = p[[4]], height = 5, width = 10, dpi = 30)
+```
+
+```{r step7: adjust position in each plot}
+p[[5]] <- ggplot2::ggplot(df[[2]], aes(x = Shape, y = RT_mean, fill = Shape))+
+  ggplot2::geom_boxplot(width = 0.1, position = position_nudge(x = -0.2), color = "grey", alpha = 0.5)+
+  ggplot2::geom_point(aes(colour = Shape), position = position_jitter(width = 0.1), size = 3, alpha = 0.5) +
+  ggplot2::geom_violin(aes(colour = Shape), width = 0.1, position = position_nudge(x = 0.2), color = "grey", alpha = 0.5) +
+  ggplot2::labs(x = "Moral & Identity", y = "Mean of Reaction Time", title = "Boxplot of RT_mean by Shape")
+
+names(p)[5] <- "Plot position"
+p[[5]]
+ggsave(filename = "./picture/chp11/plot5.png", plot = p[[5]], height = 5, width = 10, dpi = 300)
+
+```
+```{r step8: add raincloud plot}
+p[[6]] <- p[[5]] +
+  ggdist::stat_halfeye(adjust = 0.2, justification = -0.35, alpha = 0.5, width = 0.5,.width = 0, point_colour = NA)
+names(p)[6] <- "Cloud Plot"
+p[[6]]
+ggsave(filename = "./picture/chp11/plot6.png", plot = p[[6]], height = 5, width = 10, dpi = 300)
+```
+
+
+```{r step9: delete a layer}
+p[[7]] <- p[[6]]
+p[[7]]$layers[3] <- NULL
+
+names(p)[7] <- "delete layers"
+p[[7]]
+ggsave(filename = "./picture/chp11/plot7.png", plot = p[[7]], height = 5, width = 10, dpi = 300)
+```
+```{r step10: RainClooud Plot}
+
+#here i change binwidth and dotsize, or i can directly change width without changing those two
+p[[8]] <- ggplot2::ggplot(df[[2]], aes(x = Shape, y = RT_mean, fill = Shape)) +
+  ggplot2::geom_boxplot(width = 0.1,position = position_nudge(x = -0.05), color = "grey", alpha = 0.5, outlier.color = NA) +
+  ggdist::stat_halfeye(adjust = 0.2, justification = -0.05, alpha = 0.5, width = 0.5, .width = 0, point_colour = NA) +
+  ggdist::stat_dots(side = "left",justification = 1.25, alpha = 0.5, width = 0.5)+ #binwidth = 0.005, dotsize = 2) +
+  ggplot2::labs(x = "Moral & Identity", y = "Mean of Reaction Time", title = "RainCloud Plot of RT_mean by Moral & Identity") +
+  theme(plot.title = element_text(hjust = 0.5, vjust = 1.5))+
+  scale_x_discrete(expand = c(0,0))
+
+
+names(p)[8] <- "RainCloud Plot"
+p[[8]]
+ggsave(filename = "./picture/chp11/plot8.png", plot = p[[8]], height = 5, width = 10, dpi = 300)
+```
+```{r step11: RainCloud plot flip}
+p[[9]] <- p[[8]]+
+  ggplot2::coord_flip()
+names(p)[9] <- "Plot Flip";
+p[[9]]
+ggsave(filename = "./picture/chp11/plot9.png", plot = p[[9]], height = 5, width = 10, dpi = 300)
+
+```
+```{r step12: filp RainCloud Plot}
+p[[10]] <- p[[9]] +
+  ggplot2::theme(legend.position = "none")
+
+names(p)[10] <- "Legend Hidden"; p[[10]]
+ggsave(filename = "./picture/chp11/plot10.png", plot = p[[10]], height = 5, width = 10, dpi = 300)
+
+```
+
+```{r step13: palette, change fill color, axis color, axis text size, split, text size in facet}
+popsicle <- c("#F3533A", "#FA9F42", "#8AD879", "#5ACFC9")
+sunset <- c("#C848B9", "#F962A7", "#FD836D", "#FFBA69")
+glassdoor <- c("#3D9A8B", "#2EB19F", "#63C2D2", "#B7EDFF")
+
+palette <- list(popsicle = popsicle, sunset = sunset, glassdoor = glassdoor)
+rm(popsicle,sunset,glassdoor)
+
+p[[11]] <- p[[10]] +
+  ggplot2::scale_fill_manual(values = palette$popsicle) +
+  ggplot2::theme(axis.text.y = element_text(color = palette$popsicle ))+
+  ggplot2::theme(axis.text = element_text(size = 12),
+                 axis.title = element_text(size = 14),
+                 plot.title = element_text(size = 16))+
+  ggplot2::facet_wrap(~Match)+
+  ggplot2::theme(strip.text = element_text(size = 14))
+names(p)[11] <- "layers and facet full codes"
+p[[11]]
+ggsave(filename = "./picture/chp11/plot11.png", plot = p[[11]], height = 5, width = 10, dpi = 300)
+```

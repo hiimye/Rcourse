@@ -1,0 +1,7 @@
+"0","df[[2]] <- df[[1]] %>%"
+"0","  dplyr::group_by(Sub,Shape,Match) %>%"
+"0","  dplyr::summarise(RT_mean = mean(RT)) %>%"
+"0","  dplyr::ungroup()"
+"2","`summarise()` has grouped output by 'Sub', 'Shape'. You can override using the `.groups` argument."
+"0","names(df)[2] <- ""step2: clean data"""
+"0",""
