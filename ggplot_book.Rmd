@@ -1,0 +1,86 @@
+---
+title: "ggplotbook_2"
+author: "ye lin"
+date: "2023-05-18"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+
+mpg
+
+
+```
+
+
+```{r dots are overlapped}
+
+ggplot(mpg,aes(drv,hwy)) +
+  geom_point( alpha = 0.2)
+
+# many points are plotted in the same location so it is difficult to see the distribution
+# so i can use the jitter function below to separate the dots horizontally and vertically
+
+```
+
+```{r how to alleviate the overplotting problem}
+ggplot(mpg,aes(drv,hwy)) + geom_jitter()
+
+ggplot(mpg,aes(drv,hwy)) + geom_boxplot()
+
+ggplot(mpg,aes(drv,hwy)) + geom_violin()
+
+```
+
+```{r histograms and frequency polygons}
+
+ggplot(mpg, aes(hwy)) + geom_histogram(bins = 50)
+
+ggplot(mpg, aes(hwy)) + geom_histogram(binwidth = 0.5)
+
+```
+
+```{r bar charts, the discrete analogue of the histogram}
+
+drugs <- data.frame(
+  drug = c("a","b","c"),
+  effect = c(4.2,9.7,6.1)
+)
+
+# ggplot(drugs, aes(drug,effect)) + geom_bar()
+
+# this would cause an error because By default, geom_bar() requires a statistical transformation like counting or summing to determine the height of the bars.
+
+# ggplot(drugs, aes(drug,effect)) + geom_bar(stat = "count")
+# cause error too，我觉得真正的原因是，这里aes输入了x和y，如果geom_bar()的默认设置是count的话，它只要count一个东西就好了，so x or y，not x and y! `stat_count()` must only have an x or y aesthetic.
+
+ggplot(drugs, aes(drug)) + geom_bar()
+# see, this would work
+
+# 但我们真正想要的是drug is the x axis, and effect is the y axis, we can try two methods
+
+ggplot(drugs, aes(drug, effect)) + geom_bar(stat = "identity")
+# In the default behavior of geom_bar(), it uses stat = "count", which counts the number of occurrences of each category on the x-axis.
+
+# by using this argument to tell that we want to use the actual values of the y axis vaiable instead of a count of obaervations
+
+ggplot(drugs, aes(drug,effect)) + geom_col()
+# To create a bar plot with continuous data, you can use geom_col()
+# this could create a bar plot with the drug variable on the x-axis and the effect variable on the y axis
+
+```
+
+```{r}
+economics
+
+year <- function(x) as.POSIXlt(x)$year + 1900
+
+ggplot(economics, aes(unemploy / pop, uempmed)) +
+  geom_path(colour = "grey50") +
+  geom_point(aes(colour = year(date)))
+
+# see the .doc for explanation, gpt explain the codes very clearly
+# 这个主要是看失业率和失业的星期随着时间变化的路径图
+
+```
